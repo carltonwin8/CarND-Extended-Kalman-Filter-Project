@@ -23,6 +23,10 @@ public:
   // measurement covariance matrix
   Eigen::MatrixXd R_;
 
+  // some constants
+  Eigen::MatrixXd I_;
+  Eigen::VectorXd u_;
+
   /**
    * Constructor
    */
