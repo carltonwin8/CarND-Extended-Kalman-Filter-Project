@@ -27,6 +27,12 @@ public:
   void ProcessMeasurement(const MeasurementPackage &measurement_pack);
 
   /**
+   * Support Functions
+   */
+  void PolarToCartesian(const MeasurementPackage &measurement_pack, VectorXd &x_);
+  void Cartesian(const MeasurementPackage &measurement_pack, VectorXd &x_);
+
+  /**
   * Kalman Filter update and prediction math lives in here.
   */
   KalmanFilter ekf_;

@@ -91,6 +91,10 @@ int main()
           		iss >> timestamp;
           		meas_package.timestamp_ = timestamp;
                 std::cout << "R, " << ro << ", " << theta << ", " << timestamp << std::endl; // debug remove
+                // debug remove until retrun below
+                std::string msg = "42[\"manual\",{}]";
+                ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+                return;
           }
           float x_gt;
     	  float y_gt;
@@ -132,7 +136,8 @@ int main()
     	  VectorXd RMSE = tools.CalculateRMSE(estimations, ground_truth);
 
           std::cout << "EKF " << p_x << ", " << p_y << ", " <<
-                       v1 << ", " << v2 << ", " << RMSE << std::endl; // debug remove
+                       v1 << ", " << v2 << std::endl <<
+                       "RMSE" << RMSE << std::endl; // debug remove
 
           json msgJson;
           msgJson["estimate_x"] = p_x;
