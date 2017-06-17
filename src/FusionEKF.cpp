@@ -37,12 +37,6 @@ FusionEKF::FusionEKF() {
     * Set the process and measurement noises
   */
 
-  //the initial transition matrix F_
-  MatrixXd F_ = MatrixXd(4, 4);
-  F_ << 1, 0, 1, 0,
-        0, 1, 0, 1,
-        0, 0, 1, 0,
-        0, 0, 0, 1;
   H_laser_ << 1, 0, 0, 0,
             0, 1, 0, 0;
 }
@@ -57,11 +51,13 @@ void FusionEKF::PolarToCartesian(const MeasurementPackage &measurement_pack, Vec
     double theta = measurement_pack.raw_measurements_[1];
     double px = ro * cos(theta);
     double py = ro * sin(theta);
-    x_ << px, py, 0, 0;
+    x_(0) = px;
+    x_(1) = py;
 }
 
 void FusionEKF::Cartesian(const MeasurementPackage &measurement_pack, VectorXd &x_) {
-    x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0, 0;
+    x_(0) = measurement_pack.raw_measurements_[0];
+    x_(1) = measurement_pack.raw_measurements_[1];
 }
 
 void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
@@ -79,6 +75,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     */
     // first measurement
     ekf_.x_ = VectorXd(4);
+    ekf_.x_ << 0, 0, 0, 0;
     cout << "EKF: " << endl;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
@@ -86,14 +83,30 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       Convert radar from polar to cartesian coordinates and initialize state.
       */
        PolarToCartesian(measurement_pack, ekf_.x_);
+       ekf_.P_ = MatrixXd(4,4);
+       ekf_.P_ << 1000, 0, 0, 0,
+               0, 1000, 0, 0,
+               0, 0, 1000, 0,
+               0, 0, 0, 1000;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
       Initialize state.
       */
         Cartesian(measurement_pack, ekf_.x_);
+        ekf_.P_ = MatrixXd(4,4);
+        ekf_.P_ << 1000, 0, 0, 0,
+                0, 1000, 0, 0,
+                0, 0, 1000, 0,
+                0, 0, 0, 1000;
     }
     ekf_.Q_ = MatrixXd(4, 4);
+    ekf_.F_ = MatrixXd(4, 4);
+    ekf_.F_ << 1, 0, 1, 0,
+          0, 1, 0, 1,
+          0, 0, 1, 0,
+          0, 0, 0, 1;
+
     previous_timestamp_ = measurement_pack.timestamp_;
     // done initializing, no need to predict or update
     is_initialized_ = true;
@@ -114,6 +127,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   //compute the time elapsed between the current and previous measurements
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;	//dt - expressed in seconds
   previous_timestamp_ = measurement_pack.timestamp_;
+
+  cout << "F setup" << endl; // debug remove
 
   ekf_.F_(0, 2) = dt;
   ekf_.F_(1, 3) = dt;
@@ -147,7 +162,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   cout << "Update Start" << endl;
   Eigen::VectorXd x_;
-  x_ = VectorXd(4);
+  x_ = VectorXd(2);
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
     ekf_.R_ = R_radar_;

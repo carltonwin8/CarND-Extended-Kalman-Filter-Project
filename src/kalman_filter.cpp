@@ -4,9 +4,9 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 KalmanFilter::KalmanFilter() {
-    I_ = MatrixXd::Identity(2, 2);
-    u_ = VectorXd(2);
-    u_ << 0, 0;
+    I_ = MatrixXd::Identity(4, 4);
+    u_ = VectorXd(4);
+    u_ << 0, 0, 0, 0;
 }
 
 KalmanFilter::~KalmanFilter() {}
