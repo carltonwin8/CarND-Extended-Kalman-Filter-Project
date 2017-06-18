@@ -50,6 +50,7 @@ int main()
       if (s != "") {
       	
         auto j = json::parse(s);
+        cout << j << endl;
 
         std::string event = j[0].get<std::string>();
         
@@ -76,9 +77,7 @@ int main()
           		meas_package.raw_measurements_ << px, py;
           		iss >> timestamp;
           		meas_package.timestamp_ = timestamp;
-                std::cout << "L, " << px << ", " << py << ", " << timestamp << std::endl; // debug remove
           } else if (sensor_type.compare("R") == 0) {
-
       	  		meas_package.sensor_type_ = MeasurementPackage::RADAR;
           		meas_package.raw_measurements_ = VectorXd(3);
           		float ro;
@@ -90,11 +89,6 @@ int main()
           		meas_package.raw_measurements_ << ro,theta, ro_dot;
           		iss >> timestamp;
           		meas_package.timestamp_ = timestamp;
-                std::cout << "R, " << ro << ", " << theta << ", " << timestamp << std::endl; // debug remove
-                // debug remove until retrun below
-                std::string msg = "42[\"manual\",{}]";
-                ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-                return;
           }
           float x_gt;
     	  float y_gt;
@@ -110,12 +104,9 @@ int main()
     	  gt_values(2) = vx_gt;
     	  gt_values(3) = vy_gt;
     	  ground_truth.push_back(gt_values);
-
-          std::cout << "Start EKF with GT " << x_gt << ", " << y_gt << ", "
-                    << vx_gt << ", " << vy_gt << std::endl; // debug remove
+          cout << "gt " << x_gt << " " << y_gt << " " << vx_gt << " " << vy_gt << endl;
           //Call ProcessMeasurment(meas_package) for Kalman filter
     	  fusionEKF.ProcessMeasurement(meas_package);    	  
-          std::cout << "End EKF" << std::endl; // debug remove
 
     	  //Push the current estimated x,y positon from the Kalman filter's state vector
 
@@ -134,10 +125,6 @@ int main()
     	  estimations.push_back(estimate);
 
     	  VectorXd RMSE = tools.CalculateRMSE(estimations, ground_truth);
-
-          std::cout << "EKF " << p_x << ", " << p_y << ", " <<
-                       v1 << ", " << v2 << std::endl <<
-                       "RMSE" << RMSE << std::endl; // debug remove
 
           json msgJson;
           msgJson["estimate_x"] = p_x;
