@@ -50,7 +50,6 @@ int main()
       if (s != "") {
       	
         auto j = json::parse(s);
-        cout << j << endl;
 
         std::string event = j[0].get<std::string>();
         
@@ -66,7 +65,7 @@ int main()
     	  // reads first element from the current line
     	  string sensor_type;
     	  iss >> sensor_type;
-
+          cout << fixed << setprecision(3); // debug remove
     	  if (sensor_type.compare("L") == 0) {
       	  		meas_package.sensor_type_ = MeasurementPackage::LASER;
           		meas_package.raw_measurements_ = VectorXd(2);
@@ -77,6 +76,7 @@ int main()
           		meas_package.raw_measurements_ << px, py;
           		iss >> timestamp;
           		meas_package.timestamp_ = timestamp;
+                cout << endl << "L " << px << " " << py << endl;
           } else if (sensor_type.compare("R") == 0) {
       	  		meas_package.sensor_type_ = MeasurementPackage::RADAR;
           		meas_package.raw_measurements_ = VectorXd(3);
@@ -89,6 +89,7 @@ int main()
           		meas_package.raw_measurements_ << ro,theta, ro_dot;
           		iss >> timestamp;
           		meas_package.timestamp_ = timestamp;
+                cout << endl << "R " << ro*cos(theta) << " " << ro*sin(theta) << " - " << ro << " " << theta << endl;
           }
           float x_gt;
     	  float y_gt;
@@ -104,9 +105,9 @@ int main()
     	  gt_values(2) = vx_gt;
     	  gt_values(3) = vy_gt;
     	  ground_truth.push_back(gt_values);
-          cout << "gt " << x_gt << " " << y_gt << " " << vx_gt << " " << vy_gt << endl;
           //Call ProcessMeasurment(meas_package) for Kalman filter
-    	  fusionEKF.ProcessMeasurement(meas_package);    	  
+          cout << "gt " << x_gt << " " << y_gt << " " << vx_gt << " " << vy_gt << endl;
+          fusionEKF.ProcessMeasurement(meas_package);
 
     	  //Push the current estimated x,y positon from the Kalman filter's state vector
 

@@ -62,7 +62,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // first measurement
     ekf_.x_ = VectorXd(4);
     ekf_.x_ << 0, 0, 0, 0;
-    cout << "EKF: " << endl;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /** Convert radar from polar to cartesian coordinates and initialize state. */
@@ -90,9 +89,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     previous_timestamp_ = measurement_pack.timestamp_;
     // done initializing, no need to predict or update
     is_initialized_ = true;
-    cout << "measure " << measurement_pack.raw_measurements_ << endl;
-    cout << "x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl;
-    cout << "P_ " << ekf_.P_ << endl;
+    cout << "x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl; // debug remove
+    cout << "P_ " << ekf_.P_ << endl; // debug remove
     return;
   }
 
@@ -114,12 +112,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   ekf_.F_(0, 2) = dt;
   ekf_.F_(1, 3) = dt;
 
-  cout << "t " << dt << endl;
   cout << "pre-p x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl;
   cout << "pre-p P_ " << ekf_.P_ << endl;
   ekf_.Predict();
   cout << "post-p x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl;
-  cout << "port-p P_ " << ekf_.P_ << endl;
+  cout << "post-p P_ " << ekf_.P_ << endl;
 
   // Set the process covariance matrix Q
   float ax2 = 9;
@@ -145,20 +142,14 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      * Update the state and covariance matrices.
    */
 
-  Eigen::VectorXd x_; // debug remove
-  x_ = measurement_pack.raw_measurements_; // debug remove
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     ekf_.R_ = R_radar_;
     ekf_.H_ = tools.CalculateJacobian(ekf_.x_);
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
-    cout << "R " << x_(0) << " " << x_(1) << " " << x_(2) << endl; // debug remove
-    //cout << x_(0) << " " << x_(1) << " " << x_(2); // debug remove
   } else {
     ekf_.R_ = R_laser_;
     ekf_.H_ = H_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
-    cout << "L " << x_(0) << " " << x_(1) << endl; // debug remove
-    //cout << " " << x_(0) << " " << x_(1) << endl; // debug remove
   }
 
   cout << "x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl;
