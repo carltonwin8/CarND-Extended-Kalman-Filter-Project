@@ -93,8 +93,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     previous_timestamp_ = measurement_pack.timestamp_;
     // done initializing, no need to predict or update
     is_initialized_ = true;
-    cout << "x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl; // debug remove
-    cout << "P_ " << ekf_.P_ << endl; // debug remove
     return;
   }
 
@@ -130,12 +128,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
              t3ax,    0, t2ax,    0,
                 0, t3ay,    0, t2ay;
 
-  cout << "pre-p x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl;
-  cout << "pre-p P_ " << ekf_.P_ << endl;
   ekf_.Predict();
-  cout << "post-p x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl;
-  cout << "post-p P_ " << ekf_.P_ << endl;
-
   /*****************************************************************************
    *  Update
    ****************************************************************************/
@@ -155,7 +148,4 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     ekf_.H_ = H_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
   }
-
-  cout << "x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl;
-  cout << "P_ " << ekf_.P_ << endl;
 }

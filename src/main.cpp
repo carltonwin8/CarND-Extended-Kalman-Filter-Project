@@ -65,7 +65,6 @@ int main()
     	  // reads first element from the current line
     	  string sensor_type;
     	  iss >> sensor_type;
-          cout << fixed << setprecision(3); // debug remove
     	  if (sensor_type.compare("L") == 0) {
       	  		meas_package.sensor_type_ = MeasurementPackage::LASER;
           		meas_package.raw_measurements_ = VectorXd(2);
@@ -76,14 +75,6 @@ int main()
           		meas_package.raw_measurements_ << px, py;
           		iss >> timestamp;
           		meas_package.timestamp_ = timestamp;
-                int disableDueToDebug = 1;
-                if (disableDueToDebug) {
-                    cout << endl << "L " << px << " " << py << endl;
-                } else {
-                    std::string msg = "42[\"manual\",{}]";  // debug remove
-                    ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT); // debug remove
-                    return; // debug remove
-                }
           } else if (sensor_type.compare("R") == 0) {
       	  		meas_package.sensor_type_ = MeasurementPackage::RADAR;
           		meas_package.raw_measurements_ = VectorXd(3);
@@ -96,14 +87,6 @@ int main()
           		meas_package.raw_measurements_ << ro,theta, ro_dot;
           		iss >> timestamp;
           		meas_package.timestamp_ = timestamp;
-                int disableDueToDebug = 1;
-                if (disableDueToDebug) {
-                    cout << endl << "R " << ro*cos(theta) << " " << ro*sin(theta) << " - " << ro << " " << theta << endl;
-                } else {
-                    std::string msg = "42[\"manual\",{}]";  // debug remove
-                    ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT); // debug remove
-                    return; // debug remove
-                }
           }
           float x_gt;
     	  float y_gt;
@@ -120,7 +103,7 @@ int main()
     	  gt_values(3) = vy_gt;
     	  ground_truth.push_back(gt_values);
           //Call ProcessMeasurment(meas_package) for Kalman filter
-          cout << "gt " << x_gt << " " << y_gt << " " << vx_gt << " " << vy_gt << endl;
+
           fusionEKF.ProcessMeasurement(meas_package);
 
     	  //Push the current estimated x,y positon from the Kalman filter's state vector
@@ -149,8 +132,6 @@ int main()
           msgJson["rmse_vx"] = RMSE(2);
           msgJson["rmse_vy"] = RMSE(3);
           auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
-          std::cout << "rms " << p_x << " " << p_y << " " << RMSE(0) << " "
-                    << RMSE(1) << " " << RMSE(2) << " " << RMSE(3) << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
 	  
         }

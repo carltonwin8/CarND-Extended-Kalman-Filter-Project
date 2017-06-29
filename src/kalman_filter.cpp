@@ -1,10 +1,7 @@
-#include <iostream>
 #include "kalman_filter.h"
-// debug remove iostream above
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
-using namespace std; // debug remove
 
 KalmanFilter::KalmanFilter() {
     I_ = MatrixXd::Identity(4, 4);
@@ -61,28 +58,10 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   h(1) = atan2(py, px);
   h(2) = (px*vx + py*vy)/h(0);
   VectorXd y = z - h;
-  float ypre = y(1);
-  //y(1) = fmod(y(1), M_PI);
-  // y(1) = (y(1) > M_PI) ? y(1) - 2*M_PI : (y(1) < -M_PI) ? y(1) + 2*M_PI : y(1);
-  if (ypre > M_PI) {
-      cout << ypre << " > " << M_PI << endl;
-      y(1) = y(1) - 2*M_PI;
-  } else if (y(1) < -M_PI) {
-      cout << ypre << " > " << -M_PI << endl;
-      y(1) = y(1) + 2*M_PI;
-  } else {
-      cout << -M_PI << " < " << ypre << " < " << M_PI << endl;
-  }
+  y(1) = fmod(y(1), M_PI);
 
   MatrixXd s = H_*P_*H_.transpose()+R_;
   MatrixXd K = P_*H_.transpose()*s.inverse();
   x_ = x_ + K*y;
-  int age;
-  /*if (x_(0) < -14) */
-  { cout << K << endl << M_PI << endl <<
-            "z " << z(0) << " " << z(1) << " " << z(2) << endl <<
-      "h " << h(0) << " " << h(1) << " " << h(2) << endl <<
-      "y " << y(0) << " " << y(1) << " " << y(2) << " y-pre " << ypre << endl;
-      /* << "enter to continue" << endl; cin >> age; */ }
   P_ = (I_ - K*H_)*P_;
 }
