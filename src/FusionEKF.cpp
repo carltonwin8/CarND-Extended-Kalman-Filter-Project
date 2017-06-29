@@ -65,8 +65,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /** Convert radar from polar to cartesian coordinates and initialize state. */
-      ekf_.x_(0) = measurement_pack.raw_measurements_[0] * cos(measurement_pack.raw_measurements_[1]);
-      ekf_.x_(1) = measurement_pack.raw_measurements_[0] * sin(measurement_pack.raw_measurements_[1]);
+      float x_comp = cos(measurement_pack.raw_measurements_[1]);
+      float y_comp = sin(measurement_pack.raw_measurements_[1]);
+      ekf_.x_(0) = measurement_pack.raw_measurements_[0] * x_comp;
+      ekf_.x_(1) = measurement_pack.raw_measurements_[0] * y_comp;
+      ekf_.x_(2) = measurement_pack.raw_measurements_[2] * x_comp;
+      ekf_.x_(3) = measurement_pack.raw_measurements_[2] * y_comp;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
@@ -76,8 +80,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
         ekf_.x_(1) = measurement_pack.raw_measurements_[1];
     }
     ekf_.P_ = MatrixXd(4,4);
-    ekf_.P_ << 1000,    0,    0,    0,
-                  0, 1000,    0,    0,
+    ekf_.P_ <<    1,    0,    0,    0,
+                  0,    1,    0,    0,
                   0,    0, 1000,    0,
                   0,    0,    0, 1000;
     ekf_.Q_ = MatrixXd(4, 4);
@@ -112,12 +116,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   ekf_.F_(0, 2) = dt;
   ekf_.F_(1, 3) = dt;
 
-  cout << "pre-p x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl;
-  cout << "pre-p P_ " << ekf_.P_ << endl;
-  ekf_.Predict();
-  cout << "post-p x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl;
-  cout << "post-p P_ " << ekf_.P_ << endl;
-
   // Set the process covariance matrix Q
   float ax2 = 9;
   float ay2 = 9;
@@ -131,6 +129,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                 0, t4ay,    0, t3ay,
              t3ax,    0, t2ax,    0,
                 0, t3ay,    0, t2ay;
+
+  cout << "pre-p x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl;
+  cout << "pre-p P_ " << ekf_.P_ << endl;
+  ekf_.Predict();
+  cout << "post-p x_ " << ekf_.x_(0) << " " << ekf_.x_(1) << " " << ekf_.x_(2) << " " << ekf_.x_(3) << endl;
+  cout << "post-p P_ " << ekf_.P_ << endl;
 
   /*****************************************************************************
    *  Update
